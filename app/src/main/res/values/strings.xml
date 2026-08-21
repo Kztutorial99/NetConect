@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">NetCon Weather</string>
+    <!-- Overridden by build.gradle resValue from workflow input -->
+    <string name="app_name">NetCon</string>
 </resources>

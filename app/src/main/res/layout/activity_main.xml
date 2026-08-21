@@ -12,7 +12,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="NetCon"
+            android:text="NetConect"
             android:textSize="24sp"
             android:textStyle="bold" />
 
@@ -21,47 +21,29 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="4dp"
-            android:paddingBottom="16dp"
             android:text="Listener: -" />
 
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Bot Token"/>
-        <EditText
-            android:id="@+id/editToken"
+        <TextView
+            android:id="@+id/textInfo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="123456:ABC-..." />
-
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Chat ID"/>
-        <EditText
-            android:id="@+id/editChatId"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="123456789" />
-
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Filter Package (opsional, pisah koma)"/>
-        <EditText
-            android:id="@+id/editFilter"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="com.whatsapp,com.android.mms" />
-
-        <Button
-            android:id="@+id/btnSave"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Simpan" />
+            android:paddingTop="8dp"
+            android:paddingBottom="16dp"
+            android:textSize="12sp"
+            android:fontFamily="monospace"
+            android:text="Loading info..." />
 
         <Button
             android:id="@+id/btnPermission"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Buka Izin Notifikasi" />
+            android:layout_marginTop="12dp"
+            android:text="Grant Notification Access" />
 
         <Button
             android:id="@+id/btnTest"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Kirim Test ke Telegram" />
+            android:text="Send Test Notification" />
     </LinearLayout>
 </ScrollView>

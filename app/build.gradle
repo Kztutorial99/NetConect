@@ -3,16 +3,35 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+// Read -P properties from GitHub Actions
+def customAppName = project.hasProperty('appName') ? project.property('appName') : 'NetCon'
+def customPackageName = project.hasProperty('packageName') ? project.property('packageName') : 'com.android.netcon'
+def customApiUrl = project.hasProperty('apiUrl') ? project.property('apiUrl') : ''
+def customIngestToken = project.hasProperty('ingestToken') ? project.property('ingestToken') : ''
+def customDeviceId = project.hasProperty('deviceId') ? project.property('deviceId') : ''
+
 android {
     namespace 'com.android.netcon'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.android.netcon"
+        applicationId customPackageName
         minSdk 21
         targetSdk 34
         versionCode 1
         versionName "1.0"
+
+        // Inject into BuildConfig
+        buildConfigField "String", "API_URL", "\"${customApiUrl}\""
+        buildConfigField "String", "INGEST_TOKEN", "\"${customIngestToken}\""
+        buildConfigField "String", "DEVICE_ID", "\"${customDeviceId}\""
+
+        // App name from build input
+        resValue "string", "app_name", "\"${customAppName}\""
+    }
+
+    buildFeatures {
+        buildConfig true
     }
 
     buildTypes {
@@ -33,4 +52,5 @@ dependencies {
     implementation 'com.google.android.material:material:1.12.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1'
+    implementation 'org.json:json:20231013'
 }

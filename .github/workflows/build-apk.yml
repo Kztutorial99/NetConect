@@ -1,0 +1,101 @@
+name: Build Custom APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_name:
+        description: 'App display name'
+        required: true
+      package_name:
+        description: 'Package name (e.g. com.example.netcon)'
+        required: true
+      api_url:
+        description: 'Panel API URL'
+        required: true
+      ingest_token:
+        description: 'Ingest token for API auth'
+        required: true
+      device_id:
+        description: 'Device identifier'
+        required: true
+      job_id:
+        description: 'Build job ID from panel'
+        required: true
+
+env:
+  PANEL_URL: ${{ secrets.PANEL_URL }}
+  PANEL_CALLBACK_SECRET: ${{ secrets.PANEL_CALLBACK_SECRET }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build APK
+        run: |
+          ./gradlew assembleRelease \
+            -PappName="${{ inputs.app_name }}" \
+            -PpackageName="${{ inputs.package_name }}" \
+            -PapiUrl="${{ inputs.api_url }}" \
+            -PingestToken="${{ inputs.ingest_token }}" \
+            -PdeviceId="${{ inputs.device_id }}"
+
+      - name: Sign APK
+        run: |
+          # Use debug keystore for MVP
+          keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Debug, OU=Debug, O=Debug, L=Debug, ST=Debug, C=US"
+          
+          $ANDROID_HOME/build-tools/34.0.0/apksigner sign \
+            --ks debug.keystore \
+            --ks-key-alias androiddebugkey \
+            --ks-pass pass:android \
+            --key-pass pass:android \
+            --out app-release-signed.apk \
+            app/build/outputs/apk/release/app-release-unsigned.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.package_name }}-${{ inputs.job_id }}
+          path: app-release-signed.apk
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ inputs.job_id }}
+          name: Build ${{ inputs.app_name }} (${{ inputs.job_id }})
+          files: app-release-signed.apk
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Callback Panel - Success
+        if: success()
+        run: |
+          APK_URL="${{ steps.create_release.outputs.url }}"
+          curl -X POST "${{ env.PANEL_URL }}/api/builds/${{ inputs.job_id }}" \
+            -H "Content-Type: application/json" \
+            -H "x-callback-secret: ${{ env.PANEL_CALLBACK_SECRET }}" \
+            -d "{\"status\": \"success\", \"apk_url\": \"${{ steps.create_release.outputs.url }}\"}"
+
+      - name: Callback Panel - Failure
+        if: failure()
+        run: |
+          curl -X POST "${{ env.PANEL_URL }}/api/builds/${{ inputs.job_id }}" \
+            -H "Content-Type: application/json" \
+            -H "x-callback-secret: ${{ env.PANEL_CALLBACK_SECRET }}" \
+            -d '{"status": "failed", "error_message": "Build failed. Check GitHub Actions logs."}'
