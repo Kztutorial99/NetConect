@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="NetCon"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="4dp"
+            android:paddingBottom="16dp"
+            android:text="Listener: -" />
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Bot Token"/>
+        <EditText
+            android:id="@+id/editToken"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="123456:ABC-..." />
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Chat ID"/>
+        <EditText
+            android:id="@+id/editChatId"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="123456789" />
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Filter Package (opsional, pisah koma)"/>
+        <EditText
+            android:id="@+id/editFilter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="com.whatsapp,com.android.mms" />
+
+        <Button
+            android:id="@+id/btnSave"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Simpan" />
+
+        <Button
+            android:id="@+id/btnPermission"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Buka Izin Notifikasi" />
+
+        <Button
+            android:id="@+id/btnTest"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Kirim Test ke Telegram" />
+    </LinearLayout>
+</ScrollView>
