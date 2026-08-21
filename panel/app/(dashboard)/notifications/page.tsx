@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import { formatDate } from '@/lib/utils';
 
 type Notification = {
@@ -18,32 +17,6 @@ export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
-  const [supabase, setSupabase] = useState<ReturnType<typeof createClient> | null>(null);
-
-  useEffect(() => {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    if (url && anonKey) {
-      const client = createClient(url, anonKey);
-      setSupabase(client);
-
-      // Realtime subscription
-      const channel = client
-        .channel('notifications')
-        .on(
-          'postgres_changes',
-          { event: 'INSERT', schema: 'public', table: 'notifications' },
-          (payload) => {
-            setNotifications((prev) => [payload.new as Notification, ...prev]);
-          }
-        )
-        .subscribe();
-
-      return () => {
-        client.removeChannel(channel);
-      };
-    }
-  }, []);
 
   const fetchNotifications = useCallback(async () => {
     try {

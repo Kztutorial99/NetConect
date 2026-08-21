@@ -1,6 +1,6 @@
 {
-  "buildCommand": "cd panel && npm run build",
-  "installCommand": "cd panel && npm install",
-  "outputDirectory": "panel/.next",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "outputDirectory": ".next",
   "framework": "nextjs"
 }
