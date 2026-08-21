@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.caching=false"
     steps:
       - uses: actions/checkout@v4
 
@@ -16,14 +18,33 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      # GitHub cache service sering 504; matikan biar build tidak gagal karena cache.
       - uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: '8.7'
+          cache-disabled: true
 
-      - name: Build debug APK
-        run: gradle assembleDebug --no-daemon
+      - name: Build debug APK (with retry, no cache)
+        shell: bash
+        run: |
+          set -o pipefail
+          attempts=3
+          for i in $(seq 1 $attempts); do
+            echo "::group::Gradle attempt $i/$attempts"
+            if gradle assembleDebug --no-daemon --no-build-cache --no-configuration-cache --stacktrace; then
+              echo "::endgroup::"
+              exit 0
+            fi
+            echo "::endgroup::"
+            echo "Build attempt $i failed, retry in 20s..."
+            sleep 20
+          done
+          echo "All attempts failed"
+          exit 1
 
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: NetCon-debug-apk
           path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: warn
